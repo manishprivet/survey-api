@@ -1,0 +1,15 @@
+{
+    "ignore": [
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        ".git",
+        "node_modules",
+        "build",
+        ".vscode"
+    ],
+    "watch": [
+        "src"
+    ],
+    "exec": "ts-node -r dotenv/config src/main.ts",
+    "ext": "ts"
+}
