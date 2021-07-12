@@ -24,7 +24,7 @@ export class CreateSurveyDto {
 export class GetSurveyDto {
   @IsUUID()
   @ApiProperty({
-    example: '4af0062b-f78b-430f-9211-b1d2be10dc0d',
+    example: 'df4cebba-0d24-4654-bc0f-87e634f9e2ac',
     description: 'Survey UUID',
   })
   readonly id: string;

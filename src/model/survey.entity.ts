@@ -6,6 +6,9 @@ export class Survey extends BaseEntity {
   @Column()
   name: string;
 
+  @Column()
+  created_by: string;
+
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 

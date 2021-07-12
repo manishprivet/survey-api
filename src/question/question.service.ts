@@ -1,14 +1,21 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateQuestionDto, UpdateQuestionDto } from './question.dto';
+import {
+  CreateQuestionDto,
+  GetQuestionDto,
+  UpdateQuestionDto,
+} from './question.dto';
 import { Question } from '../model/question.entity';
+import { Answer } from '../model/answer.entity';
 
 @Injectable()
 export class QuestionService {
   constructor(
     @InjectRepository(Question)
     private readonly repo: Repository<Question>,
+    @InjectRepository(Answer)
+    private readonly answerRepo: Repository<Answer>,
   ) {}
 
   public async create({ title, survey_id }: CreateQuestionDto) {
@@ -21,6 +28,22 @@ export class QuestionService {
         throw new HttpException('Invalid Survey ID', HttpStatus.NOT_FOUND);
       throw new Error(err);
     }
+  }
+
+  public async get(question: GetQuestionDto) {
+    const questionEntity = await this.repo.findOne({
+      where: { id: question.id },
+      select: ['title', 'id', 'created_at'],
+    });
+    if (!questionEntity)
+      throw new HttpException('Question not found', HttpStatus.NOT_FOUND);
+
+    const answers = await this.answerRepo.find({
+      where: { question_id: question.id },
+      select: ['id', 'answer', 'created_by', 'created_at'],
+    });
+
+    return { ...questionEntity, answers };
   }
 
   public async update(question: UpdateQuestionDto) {

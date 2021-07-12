@@ -11,4 +11,7 @@ export class Answer extends BaseEntity {
 
   @Column()
   answer: string;
+
+  @Column()
+  created_by: string;
 }

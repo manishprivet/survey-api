@@ -11,9 +11,16 @@ export class AnswerService {
     private readonly repo: Repository<Answer>,
   ) {}
 
-  public async create({ answer, question_id }: CreateAnswerDto) {
+  public async create(
+    { answer, question_id }: CreateAnswerDto,
+    username: string,
+  ) {
     try {
-      const asnwer = this.repo.create({ answer, question_id });
+      const asnwer = this.repo.create({
+        answer,
+        question_id,
+        created_by: username,
+      });
       await this.repo.save(asnwer);
       return asnwer;
     } catch (err) {

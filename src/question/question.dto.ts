@@ -20,7 +20,7 @@ export class CreateQuestionDto {
 export class UpdateQuestionDto {
   @IsUUID()
   @ApiProperty({
-    example: '2d74e7e1-d1cb-4656-afc4-328301865a47',
+    example: 'c4722d59-1a34-44f8-92f9-97ba8eb59478',
     description: 'ID of the Question',
   })
   readonly question_id: string;
@@ -31,4 +31,13 @@ export class UpdateQuestionDto {
     description: 'New Title of the Question',
   })
   readonly title: string;
+}
+
+export class GetQuestionDto {
+  @IsUUID()
+  @ApiProperty({
+    example: 'c4722d59-1a34-44f8-92f9-97ba8eb59478',
+    description: 'ID of the Question',
+  })
+  readonly id: string;
 }

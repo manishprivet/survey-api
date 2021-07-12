@@ -1,5 +1,14 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Param,
+  ParseBoolPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { ApiHeader, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { CreateSurveyDto, GetSurveyDto } from './survey.dto';
 import { SurveyService } from './survey.service';
 
@@ -9,17 +18,26 @@ export class SurveyController {
 
   @Post('create')
   @ApiOperation({ summary: 'Create a Survey' })
-  @ApiResponse({ status: 200, description: 'Survey Created' })
-  public async create(@Body() survey: CreateSurveyDto) {
-    const createdSurvey = await this.serv.create(survey);
+  @ApiHeader({
+    name: 'X-Username',
+    description: 'Username of the user',
+  })
+  public async create(
+    @Body() survey: CreateSurveyDto,
+    @Headers('X-Username') username: string,
+  ) {
+    const createdSurvey = await this.serv.create(survey, username);
     return createdSurvey;
   }
 
   @Get('/:id')
   @ApiOperation({ summary: 'Get a Survey' })
-  @ApiResponse({ status: 200, description: 'Survey Found' })
-  public async get(@Param() survey: GetSurveyDto) {
-    const createdSurvey = await this.serv.get(survey);
+  @ApiQuery({ name: 'withAnswers', description: 'Get Survey with Answers' })
+  public async get(
+    @Param() survey: GetSurveyDto,
+    @Query('withAnswers', ParseBoolPipe) withAnswers: boolean,
+  ) {
+    const createdSurvey = await this.serv.get(survey, withAnswers);
     return createdSurvey;
   }
 }

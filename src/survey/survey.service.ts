@@ -17,8 +17,8 @@ export class SurveyService {
     private questionService: QuestionService,
   ) {}
 
-  public async create({ name, questions }: CreateSurveyDto) {
-    const survey = this.repo.create({ name });
+  public async create({ name, questions }: CreateSurveyDto, username: string) {
+    const survey = this.repo.create({ name, created_by: username });
     await this.repo.save(survey);
 
     questions.forEach(async (question) => {
@@ -28,18 +28,10 @@ export class SurveyService {
     return survey;
   }
 
-  public async get(survey: GetSurveyDto) {
+  public async get(survey: GetSurveyDto, withAnswers: boolean) {
     const surveyEntity = await this.repo.findOne({ id: survey.id });
     if (!surveyEntity)
       throw new HttpException('Survey not found', HttpStatus.NOT_FOUND);
-    const answerData = await getManager()
-      .createQueryBuilder(Question, 'ques')
-      .select(
-        'ques.id as question_id, ques.title as question, ans.created_at as answer_date, ans.answer as answer',
-      )
-      .innerJoin(Answer, 'ans', 'ques.id = ans.question_id')
-      .where(`ques.survey_id = :id`, { id: survey.id })
-      .getRawMany();
 
     const questions = await this.questionRepo.find({
       where: { survey_id: survey.id },
@@ -52,15 +44,28 @@ export class SurveyService {
       data.questions.push({
         id: question.id,
         title: question.title,
-        answers: [],
+        ...(withAnswers ? { answers: [] } : {}),
       }),
     );
 
-    answerData.forEach((answer) => {
-      data.questions
-        .find((q) => q.id === answer.question_id)
-        .answers.push(answer.answer);
-    });
+    if (withAnswers) {
+      const answerData = await getManager()
+        .createQueryBuilder(Question, 'ques')
+        .select(
+          'ques.id as question_id, ques.title as question, ans.created_at as answer_date, ans.answer as answer, ans.created_by as answered_by',
+        )
+        .innerJoin(Answer, 'ans', 'ques.id = ans.question_id')
+        .where(`ques.survey_id = :id`, { id: survey.id })
+        .getRawMany();
+      answerData.forEach((answer) => {
+        data.questions
+          .find((q) => q.id === answer.question_id)
+          .answers.push({
+            answer: answer.answer,
+            answered_by: answer.answered_by,
+          });
+      });
+    }
 
     return data;
   }
